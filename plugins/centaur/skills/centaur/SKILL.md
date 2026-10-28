@@ -10,10 +10,10 @@ Use Centaur's MCP tools for actions and context exposed by the user's deployment
 ## Workflow
 
 1. When identity or authorization matters, call `centaur_whoami` before other Centaur tools.
-2. If the `centaur` MCP tool is listed, use it to list or search the tool catalog when the correct tool is unclear.
-3. When `centaur` is available, inspect an unfamiliar CLI progressively with `{"command": ["run", "<tool>", "--help"]}`. Add known command and subcommand segments before `--help` until the relevant options and arguments are shown. Treat that help output as the current contract.
-4. When `centaur` is available, run the command with `{"command": ["run", "<tool>", "<argv>", "..."]}`. Pass every CLI argument as a separate token and do not guess command names or options.
-5. If `centaur` is not listed or cannot complete the request, use the legacy per-service MCP tools. Each accepts a `method` and `arguments` object. Call it with `method: "help"` when its methods or arguments are unclear.
+2. If `centaur_catalog_search` is listed, search the catalog with `{"query": "<service, URL, or action>"}` when the correct tool is unclear.
+3. Load the chosen tool with `centaur_catalog_load` and `{"tool": "<tool>"}`. It returns the tool's description and top-level CLI help. Treat that help as the current contract.
+4. Run the tool with `centaur_tool_call` and `{"tool": "<tool>", "argv": ["<command>", "..."]}`. Pass every CLI argument as a separate array element and do not guess command names or options. To inspect a subcommand, call it with its command segments followed by `--help`.
+5. If the catalog tools are not listed, use the legacy per-service MCP tools. Each accepts a `method` and `arguments` object. Call it with `method: "help"` when its methods or arguments are unclear.
 6. Summarize consequential writes and return relevant identifiers or links.
 
 Centaur authorizes calls using the signed-in principal's live roles and grants. Never request, paste, print, or store Centaur OAuth tokens.

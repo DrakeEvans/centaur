@@ -34,12 +34,15 @@ def _client() -> MyClient:
 
 ## Secrets
 
-Secrets are resolved in this order:
-1. **Tool `.env`** — per-tool overrides in `tools/<name>/.env`
-2. **Root `.env`** — central file at repo root (define all secrets here)
-3. **Environment variables** — for Docker, k8s, sops, 1Password, etc.
+Use `secret("KEY")` to access a credential. In a sandbox it returns a
+placeholder (the key name itself), and the per-sandbox iron-proxy swaps in the
+real value on outbound requests to the hosts the secret is bound to. If the key
+is set in the environment, its value is returned instead, which is how
+`pg_dsn` secrets reach a tool.
 
-Use `secret("KEY")` to access. Never use `os.environ` — tool secrets are scoped.
+Declare each secret, with its hosts and allowed request locations, under
+`[tool.centaur] secrets` in `pyproject.toml`. Never read `os.environ` or load
+`.env` files in tool code; ruff rejects both.
 
 ## Sandbox CLI shims
 

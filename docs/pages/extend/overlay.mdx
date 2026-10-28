@@ -164,8 +164,10 @@ Verify an agent sandbox sees merged tools and copied skills:
 kubectl exec -n centaur <agent-sandbox-pod> -- sh -lc '
   echo "$TOOL_DIRS"
   echo "$CENTAUR_SKILL_DIRS"
-  ls -la /app/tools
-  find /workspace/.agents/skills -maxdepth 2 -type f -name SKILL.md | sort
+  ls -la /opt/centaur/tools
+  for ws in ~/state/workspace ~/workspace; do
+    test -d "$ws/.agents/skills" && find "$ws/.agents/skills" -maxdepth 2 -type f -name SKILL.md | sort
+  done
 '
 ```
 

@@ -104,7 +104,7 @@ The Okta application must use the authorization-code flow with PKCE and the RS25
 
 All three providers request the `openid`, `email`, and `profile` scopes. Client credentials may also be stored in Rails credentials under `console_auth.<provider>.client_id` and `console_auth.<provider>.client_secret`, but environment variables take precedence. Okta's issuer and token-endpoint authentication method may likewise be stored at `console_auth.okta.issuer` and `console_auth.okta.token_endpoint_auth_method`.
 
-Google OAuth consent apps for broker credentials are configured separately in the console under **OAuth Apps**. Those app callbacks use `/oauth/<slug>/callback` and currently support Google only; Slack support here applies to operator console sign-in.
+OAuth consent apps for broker credentials are configured separately in the console under **OAuth Apps**. Those app callbacks use `/oauth/<slug>/callback`. Supported providers are listed in `lib/oauth/providers.rb` and in the [OAuth Apps guide](../../docs/pages/secrets/oauth-apps.mdx). The SSO settings above apply only to operator console sign-in.
 
 ## Google Docs Sync
 

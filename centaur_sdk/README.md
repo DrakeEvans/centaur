@@ -22,11 +22,16 @@ from centaur_sdk import secret
 api_key = secret("MY_API_KEY")
 ```
 
-In server mode, `secret()` returns stub values that the firewall replaces
-with real credentials in-flight. In CLI mode, configure a backend first:
+By default, `secret()` uses `StubBackend`: it returns the key name as a
+placeholder, and iron-proxy replaces it with the real credential on matching
+outbound requests. When the key is set in the environment, the environment
+value is returned instead.
+
+To run a tool outside a sandbox against real credentials in your shell,
+configure `EnvBackend` first. Don't use it in code that runs in a sandbox.
 
 ```python
-from centaur_sdk.backends import configure, DotEnvBackend
+from centaur_sdk.backends import EnvBackend, configure
 
-configure(DotEnvBackend(".env"))
+configure(EnvBackend())
 ```

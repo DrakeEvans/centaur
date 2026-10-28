@@ -108,8 +108,8 @@ sandbox capabilities in
 
 ## 4. Verify the API
 
-The API exposes localhost inside its own deployment. Localhost bypasses external
-API-key auth, which is why the health check runs through `kubectl exec`:
+`/healthz` needs no API key. The API is not exposed outside the cluster by
+default, so run the health check through `kubectl exec`:
 
 ```bash
 kubectl exec -n centaur deploy/centaur-centaur-api-rs -- \
@@ -124,35 +124,43 @@ Expected shape:
 
 ## 5. Run an agent turn
 
-Before testing Slack, run the local smoke test. It uses the same durable agent
-API that Slackbot uses: spawn or reuse a runtime, persist a message, enqueue an
-execution, and poll the execution state until the result contains `PONG`.
+Before testing Slack, run one turn through the same durable session API that
+Slackbot uses: create or reuse a session, persist a message, start an
+execution, and stream its events. `centaur-session-cli` does all four. With no
+`--message`, it asks the agent to reply with exactly `PONG`.
+
+Forward the API to your machine in one terminal:
 
 ```bash
-just smoke
+kubectl port-forward -n centaur deploy/centaur-centaur-api-rs 8080:8080
 ```
 
-The successful result includes the terminal execution row. The important fields
-are:
+In another terminal, from the repository root, run the CLI with the
+`SLACKBOT_API_KEY` you exported for bootstrap. That key may only use `slack:`
+thread keys, so give the test thread that prefix:
 
-```json
-{
-  "status": "completed",
-  "result_text": "...PONG..."
-}
+```bash
+CENTAUR_API_TOKEN="$SLACKBOT_API_KEY" cargo run -p centaur-session-cli -- \
+  --thread-key "slack:local-smoke:$(date +%s)" \
+  --max-duration-ms 300000 \
+  --exit-on-terminal
 ```
 
-If the smoke test times out or fails, start with the local stack state:
+The CLI prints each harness output line as `<event_id>` and a JSON payload. The
+agent message lines should contain `PONG`, and the CLI exits when the execution
+reaches a terminal state.
+
+If the turn times out or fails, start with the local stack state:
 
 ```bash
 just status
-just logs api
+just logs api-rs
 kubectl get pods -n centaur -l centaur.ai/managed=true
 ```
 
 If you changed the namespace or release name, set `CENTAUR_NAMESPACE` and
-`CENTAUR_RELEASE` before running `just smoke` so the recipe targets the right
-deployment.
+`CENTAUR_RELEASE` so `just status` and `just logs` target the right deployment,
+and use that namespace in the commands above.
 
 ## 6. Setup Slack integration
 
@@ -253,7 +261,7 @@ Slack messages without a harness flag use Codex. Add a selector such as
 If Slack receives the mention but no agent runs, inspect Slackbot logs:
 
 ```bash
-just logs slackbot
+just logs slackbotv2
 ```
 
 You should see `POST /api/webhooks/slack`.
