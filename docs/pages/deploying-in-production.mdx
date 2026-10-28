@@ -373,15 +373,13 @@ secretManager:
   existingSecretName: centaur-infra-env
   envPrefix: ""
 
-api:
-  executionWorkerEnabled: true
-  warmPoolEnabled: true
-
 ironProxy:
   secretSource: onepassword-connect
   secretTtl: 10m
 
 apiRs:
+  # Ready sandboxes kept warm for new threads.
+  sandboxWarmPoolSize: 3
   # Delete any sandbox older than this, running or suspended.
   sandboxMaxLifetimeSecs: 259200
 

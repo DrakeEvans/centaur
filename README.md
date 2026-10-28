@@ -99,11 +99,7 @@ The main directories are:
 
 Centaur runs locally on Kubernetes, but local setup does not require a full
 production Kubernetes installation. A lightweight k3s cluster on a small
-always-on host is enough. The expected local checkout path is:
-
-```bash
-/Users/magelinskaas/paradigmxyz/centaur
-```
+always-on host is enough.
 
 Clone the repo and enter it:
 
@@ -160,7 +156,7 @@ just bootstrap-secrets
 just up
 ```
 
-After `just up` finishes, use Slack or the API examples in the [Developer Guide](AGENTS.md#e2e-testing-without-slack).
+After `just up` finishes, run a test turn through the API with the [Quickstart](docs/pages/quickstart.mdx#5-run-an-agent-turn), then connect Slack.
 
 For a more explicit path, see [Running Centaur on a Mac Mini-style setup](docs/pages/mac-mini-setup.mdx).
 It covers k3s on a small VPS, DigitalOcean droplet, Linux box, or Mac
@@ -242,12 +238,14 @@ just build-one <service>
 just deploy
 ```
 
-For Python checks:
+For Python checks (there is no root Python project; each tool, the SDK, and the
+workflow host are packaged separately):
 
 ```bash
-uv run ruff check .
-uv run ruff format .
-uv run pytest
+uvx ruff check tools centaur_sdk
+uvx ruff format --check tools centaur_sdk
+uv run --project services/workflow-python --with pytest python -m pytest workflows/tests
+.github/scripts/run-tool-tests.sh
 ```
 
 See the [Developer Guide](AGENTS.md) for code conventions and end-to-end testing instructions.

@@ -15,7 +15,10 @@ simplest setup is to point the local chart at those images instead of building
 and importing images into k3s' container runtime.
 
 If you are evaluating on macOS, especially Apple Silicon, use the local-build
-path below. Native k3s is Linux-only, and published images are currently x86 only. In that case, build the images locally and load them into the local cluster runtime.
+path below. Native k3s is Linux-only. Images published from `main` and release
+tags are multi-arch (amd64 and arm64), but `pr-N` and `sha-*` images from pull
+requests are amd64 only. To run local changes, build the images locally and load
+them into the local cluster runtime.
 
 ## macOS local evaluation with kind
 
@@ -43,8 +46,19 @@ kind load docker-image \
 
 Kind nodes have their own containerd image store, so local `docker build` images
 are not visible to Kubernetes until you run `kind load docker-image`. The same
-separate-image-store rule applies to k3s; use `just up k3s` there to import
-images into k3s containerd.
+separate-image-store rule applies to k3s. `just up k3s` pushes images to a local
+registry (`localhost:5000` by default, set with `CENTAUR_LOCAL_REGISTRY`), so
+configure k3s to use it as a `docker.io` mirror in
+`/etc/rancher/k3s/registries.yaml`:
+
+```yaml
+mirrors:
+  docker.io:
+    endpoint: ["http://localhost:5000"]
+```
+
+`just _import-k3s` still imports images straight into k3s containerd as a
+slower fallback.
 
 ## 1. Install k3s
 
